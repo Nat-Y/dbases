@@ -1,0 +1,59 @@
+-- Homework
+-- Task 1
+SELECT name from users WHERE id IN (select user_id FROM orders);
+
+-- Task 2
+SELECT p.name, c.name 
+	from products AS p 
+	left join catalogs as c 
+	on c.id = p.catalog_id;
+
+-- Task 3
+DROP TABLE IF EXISTS flights;
+CREATE TABLE flights (
+  id SERIAL PRIMARY KEY,
+  flight_from VARCHAR(255) COMMENT 'flight_to',
+  flight_to VARCHAR(255) COMMENT 'flight_from');
+ 
+INSERT INTO flights
+  (flight_from, flight_to)
+VALUES
+  ('Moscow', 'Omsk'),
+  ('Novgorod', 'Kazan'),
+  ('Irkutsk', 'Moscow'),
+  ('Omsk', 'Irkutsk'),
+  ('Moscow', 'Kazan');
+  
+DROP TABLE IF EXISTS cities;
+CREATE TABLE cities (
+  id SERIAL PRIMARY KEY,
+  label VARCHAR(255) COMMENT 'EN name',
+  name VARCHAR(255) COMMENT 'RU name');
+  
+INSERT INTO cities
+  (label, name)
+VALUES
+  ('Moscow', 'Москва'),
+  ('Novgorod', 'Новгород'),
+  ('Irkutsk', 'Иркутск'),
+  ('Omsk', 'Омск'),
+  ('Kazan', 'Казань');
+  
+With ru_to as 
+(SELECT p.id, c.name as ru_to
+	from flights AS p 
+	left join cities as c 
+	on p.flight_to = c.label),
+	ru_from as 
+	(SELECT p.id, c.name as ru_from 
+		from flights AS p 
+		left join cities as c 
+		on p.flight_from = c.label) 
+	SELECT a.ru_from, b.ru_to
+		from ru_to as b
+		left join ru_from as a 
+		on a.id = b.id;
+
+with tbl1 as
+(select flights.*, cities.name as ru_to from flights left join cities on flights.flight_to = cities.label )
+	select tbl1.ru_to,cities.name as ru_from from tbl1 left join cities on tbl1.flight_from = cities.label;
